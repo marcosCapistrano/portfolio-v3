@@ -1,15 +1,15 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import fetchApi from "../lib/strapi";
-import type Article from "../interfaces/article";
+// import fetchApi from "../lib/strapi";
+// import type Article from "../interfaces/article";
 import CanvasMagic from "../components/CanvasMagic.astro";
 
-const articles = await fetchApi<Article[]>({
-	endpoint: "articles",
-	wrappedByKey: "data", // the key to unwrap the response
-});
+// const articles = await fetchApi<Article[]>({
+// 	endpoint: "articles",
+// 	wrappedByKey: "data", // the key to unwrap the response
+// });
 
-console.log(articles);
+// console.log(articles);
 ---
 
 <BaseLayout>
@@ -17,7 +17,7 @@ console.log(articles);
 	<main class="homepage wrapper">
 		<section class="recent-posts">
 			<h1>Publicações Recentes</h1>
-			<ul>
+			<!-- <ul>
 				{
 					articles.map((article) => (
 						<a href={`/blog/${article.attributes.slug}/`}>
@@ -25,7 +25,7 @@ console.log(articles);
 						</a>
 					))
 				}
-			</ul>
+			</ul> -->
 		</section>
 	</main>
 </BaseLayout>
