@@ -1,0 +1,46 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import fetchApi from "../lib/strapi";
+import type Article from "../interfaces/article";
+import CanvasMagic from "../components/CanvasMagic.astro";
+
+const articles = await fetchApi<Article[]>({
+	endpoint: "articles",
+	wrappedByKey: "data", // the key to unwrap the response
+});
+
+console.log(articles);
+---
+
+<BaseLayout>
+	<CanvasMagic />
+	<main class="homepage wrapper">
+		<section class="recent-posts">
+			<h1>Publicações Recentes</h1>
+			<ul>
+				{
+					articles.map((article) => (
+						<a href={`/blog/${article.attributes.slug}/`}>
+							{article.attributes.title}
+						</a>
+					))
+				}
+			</ul>
+		</section>
+	</main>
+</BaseLayout>
+
+<style lang="scss">
+	.homepage {
+		section {
+			h1 {
+				font-family: var(--ff-barlow-semi);
+				font-size: var(--fs-300);
+				font-weight: 500;
+				letter-spacing: 2.5px;
+				color: var(--font-color-light-accent);
+				margin-bottom: 1.5rem;
+			}
+		}
+	}
+</style>

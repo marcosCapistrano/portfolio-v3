@@ -1,0 +1,66 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    --font-color-light-primary: #FFFFFF;
+    --font-color-light-secondary: #8497AD;
+    --font-color-light-accent: #CC0087;
+
+    --main-bg-color-dark: #0E141B;
+
+    --ff-main: "Roboto";
+    --ff-barlow: "Barlow";
+    --ff-barlow-semi: "Barlow Semi Condensed"
+
+    --fs-300: .75rem;
+    --fs-400: 1rem;
+    --fs-500: 1.25rem;
+    --fs-600: 1.5rem;
+    --fs-700: 2.5rem;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+
+    background-color: var(--main-bg-color-dark);
+    font-family: var(--ff-main);
+    color: var(--font-color-light-secondary);
+}
+
+ul,
+ol {
+    margin: 0;
+    padding: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+    margin: 0;
+    padding: 0;
+}
+
+a {
+    color: inherit;
+    text-decoration: inherit;
+}
+
+/* ------------- */
+
+.wrapper {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding-inline: 6%;
+}
+
+section>h1 {
+    text-transform: uppercase;
+}

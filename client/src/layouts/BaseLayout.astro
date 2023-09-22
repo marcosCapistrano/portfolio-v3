@@ -1,0 +1,21 @@
+---
+import '../styles/globals.scss'
+import '@fontsource/barlow';
+import '@fontsource/barlow-semi-condensed';
+import '@fontsource/roboto';
+import Header from "../components/Header.astro";
+
+const {title} = Astro.props
+---
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>{title}</title>
+    </head>
+    <body>
+        <Header />
+        <slot />
+    </body>
+</html>

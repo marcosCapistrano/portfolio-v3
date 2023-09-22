@@ -1,0 +1,29 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import fetchApi from "../lib/strapi";
+import type Article from "../interfaces/article";
+
+const articles = await fetchApi<Article[]>({
+	endpoint: "articles",
+	wrappedByKey: "data", // the key to unwrap the response
+});
+
+const title = "About me"
+---
+
+<BaseLayout title="About me">
+	<main class="homepage wrapper">
+		<section class="recent-posts">
+			<h1>Posts Recentes</h1>
+			<ul>
+				{
+					articles.map((article) => (
+						<a href={`/blog/${article.attributes.slug}/`}>
+							{article.attributes.title}
+						</a>
+					))
+				}
+			</ul>
+		</section>
+	</main>
+</BaseLayout>
