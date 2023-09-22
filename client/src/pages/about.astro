@@ -1,12 +1,12 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import fetchApi from "../lib/strapi";
-import type Article from "../interfaces/article";
+// import fetchApi from "../lib/strapi";
+// import type Article from "../interfaces/article";
 
-const articles = await fetchApi<Article[]>({
-	endpoint: "articles",
-	wrappedByKey: "data", // the key to unwrap the response
-});
+// const articles = await fetchApi<Article[]>({
+// 	endpoint: "articles",
+// 	wrappedByKey: "data", // the key to unwrap the response
+// });
 
 const title = "About me"
 ---
@@ -15,7 +15,7 @@ const title = "About me"
 	<main class="homepage wrapper">
 		<section class="recent-posts">
 			<h1>Posts Recentes</h1>
-			<ul>
+			<!-- <ul>
 				{
 					articles.map((article) => (
 						<a href={`/blog/${article.attributes.slug}/`}>
@@ -23,7 +23,7 @@ const title = "About me"
 						</a>
 					))
 				}
-			</ul>
+			</ul> -->
 		</section>
 	</main>
 </BaseLayout>
