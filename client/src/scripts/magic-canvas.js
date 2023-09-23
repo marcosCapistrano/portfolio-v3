@@ -148,8 +148,8 @@ function renderLiquidLines(topmostCircles, fillColor) {
 // Function to update ball velocities based on accelerometer data
 function updateBallVelocities(accelerationX, accelerationY) {
     // You may need to adjust these scaling factors to match the range of your accelerometer data
-    const accelerationScaleX = 0.1; // Adjust as needed
-    const accelerationScaleY = 0.1; // Adjust as needed
+    const accelerationScaleX = 0.01; // Adjust as needed
+    const accelerationScaleY = 0.01; // Adjust as needed
 
     for (const circle of circles) {
         // Update the ball's velocity based on accelerometer data
