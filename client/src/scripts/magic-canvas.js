@@ -162,7 +162,7 @@ window.addEventListener('devicemotion', handleAccelerometerData);
 
 // Call this function when you have new accelerometer data
 function handleAccelerometerData(event) {
-    const accelerationX = event.accelerationIncludingGravity.x;
+    const accelerationX = event.accelerationIncludingGravity.x * -1;
     const accelerationY = event.accelerationIncludingGravity.y;
 
     updateBallVelocities(accelerationX, accelerationY);
