@@ -1,123 +1,193 @@
-let canvas = document.getElementById("magic-canvas");
-let ctx = canvas.getContext("2d");
+const canvas = document.getElementById("magic-canvas");
+const ctx = canvas.getContext("2d");
+const circles = [];
 
-let canvasComputedStyle = getComputedStyle(canvas);
-let canvasWidth = parseFloat(canvasComputedStyle.getPropertyValue("width"), 10);
-let canvasHeight = parseFloat(canvasComputedStyle.getPropertyValue("height"), 10);
+// Function to generate a random number between min and max
+function randomInRange(min, max) {
+    return Math.random() * (max - min) + min;
+}
 
-console.log(canvasHeight)
+// Circle class
+class Circle {
+    constructor(x, y, radius) {
+        this.x = x;
+        this.y = y;
+        this.radius = radius;
+        this.color = `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`;
+        this.velocityX = randomInRange(-2, 2);
+        this.velocityY = randomInRange(-2, 2);
+    }
 
-var scaleX = canvas.width / canvasWidth;
-var scaleY = canvas.height / canvasHeight;
+    draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.closePath();
+    }
 
-var mouseX = 10;
-var mouseY = 10;
+    update() {
+        this.x += this.velocityX;
+        this.y += this.velocityY;
 
-const arrowSize = 10;
+        // Check for collisions with walls
+        if (this.x + this.radius > canvas.width || this.x - this.radius < 0) {
+            if (this.x + this.radius > canvas.width) {
+                this.x = canvas.width - this.radius
+            } else {
+                this.x = this.radius
+            }
+            this.velocityX *= -0.6; // Reduced bounce (change this value as needed)
+        }
+        if (this.y + this.radius > canvas.height || this.y - this.radius < 0) {
+            if (this.y + this.radius > canvas.height) {
+                this.y = canvas.height - this.radius
+            } else {
+                this.y = this.radius
+            }
+            this.velocityY *= -0.6; // Reduced bounce (change this value as needed)
+        }
+    }
+}
 
-function setup() {
-    if (ctx) {
-        console.log(canvasWidth)
-        console.log(canvasHeight)
+function solveCollisions(circles) {
+    for (let i = 0; i < circles.length; i++) {
+        for (let j = i + 1; j < circles.length; j++) {
+            const circle1 = circles[i];
+            const circle2 = circles[j];
 
-        for (let i = 0; i < canvasWidth; i += arrowSize * 2) {
-            for (let j = 0; j < canvasHeight; j += arrowSize * 2) {
-                ctx.beginPath();
-                ctx.moveTo(i * scaleX, j * scaleY);
-                ctx.lineTo(i * scaleX, j * scaleY);
-                ctx.stroke();
+            const dx = circle2.x - circle1.x;
+            const dy = circle2.y - circle1.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < circle1.radius + circle2.radius) {
+                // Calculate the angle of collision
+                const angle = Math.atan2(dy, dx);
+
+                // Calculate the overlap distance
+                const overlap = (circle1.radius + circle2.radius) - distance;
+
+                // Move the circles apart so they don't overlap
+                const moveX = (overlap / 2) * Math.cos(angle);
+                const moveY = (overlap / 2) * Math.sin(angle);
+
+                circle1.x -= moveX;
+                circle1.y -= moveY;
+                circle2.x += moveX;
+                circle2.y += moveY;
+
+                // Calculate the new velocities after collision
+                const relativeVelocityX = circle2.velocityX - circle1.velocityX;
+                const relativeVelocityY = circle2.velocityY - circle1.velocityY;
+                const dotProduct = (dx * relativeVelocityX + dy * relativeVelocityY) / distance;
+
+                // Apply the collision response
+                const impulseX = (2 * dotProduct * dx) / (distance * (circle1.radius + circle2.radius));
+                const impulseY = (2 * dotProduct * dy) / (distance * (circle1.radius + circle2.radius));
+
+                circle1.velocityX += impulseX;
+                circle1.velocityY += impulseY;
+                circle2.velocityX -= impulseX;
+                circle2.velocityY -= impulseY;
             }
         }
     }
-
-    canvas.addEventListener("mousemove", function (event) {
-        mouseX = event.clientX - canvas.getBoundingClientRect().left;
-        mouseY = event.clientY - canvas.getBoundingClientRect().top;
-    })
 }
 
-function mag(vecX, vecY) {
-    return Math.sqrt(vecX * vecX + vecY * vecY)
-}
-
-function normalize(vecX, vecY) {
-    let m = mag(vecX, vecY);
-    if (m != 0) {
-        return [vecX / m, vecY / m];
+// Function to create random circles
+function createRandomCircles(count) {
+    for (let i = 0; i < count; i++) {
+        const radius = 30;
+        const x = randomInRange(radius, canvas.width - radius);
+        const y = randomInRange(radius, canvas.height - radius);
+        circles.push(new Circle(x, y, radius));
     }
-
-    return [vecX, vecY]
 }
 
-// Define wave properties
-var waveSpeed = 0.015; // Speed of the wave animation
-var waveAmplitude = 70; // Amplitude of the wave
-var waveFrequency = 0.15; // Frequency of the wave
-var waveColor = "rgb(14, 20, 27)"; // Color of the wave
+// Gravity
+function applyGravity() {
+    for (const circle of circles) {
+        circle.velocityY += 0.04; // Adjust gravity strength as needed
+    }
+}
+// Function to get the topmost circles
 
-// Initialize the time variable
-var time = 0;
+function getTopmostCircles(circles) {
+    const topmostCircles = {};
 
-function draw(event) {
-    // Get the mouse coordinates relative to the canvas
-
-    // Clear the canvas
-    // ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "black"; // Replace "blue" with your desired color
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-};
-
-setup()
-
-function drawWave() {
-    // Clear the canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    ctx.lineWidth = 3; // Line width in pixels
-    ctx.strokeStyle = "black"; // Line color
-
-    for (let i = 0; i < canvasWidth; i += arrowSize + (arrowSize / 1.1)) {
-        for (let j = 0; j < canvasHeight; j += arrowSize + (arrowSize / 1.1)) {
-            let centerX = i;
-            let centerY = j;
-
-            let deltaX = mouseX - centerX;
-            let deltaY = mouseY - centerY;
-
-            let [finalX, finalY] = normalize(deltaX, deltaY);
-            finalX *= arrowSize;
-            finalY *= arrowSize;
-
-            // Draw a line from the center of the canvas to the capped mouse coordinates
-            ctx.beginPath();
-            ctx.moveTo(centerX * scaleX, centerY * scaleY);
-            ctx.lineTo((centerX + finalX) * scaleX, (centerY + finalY) * scaleY);
-            ctx.stroke();
+    for (const circle of circles) {
+        const x = Math.floor(circle.x);
+        if (!topmostCircles[x] || topmostCircles[x].y > circle.y) {
+            topmostCircles[x] = circle;
         }
     }
 
-
-    // Draw the waves
-    ctx.beginPath();
-    ctx.moveTo(0, canvas.height + 1000);
-
-    for (var x = 0; x < canvas.width; x += waveAmplitude) {
-        var y = waveAmplitude * Math.sin(waveFrequency * x + time);
-        ctx.lineTo(x, canvas.height - (y + waveAmplitude + 100));
-    }
-
-    ctx.lineTo(canvas.width+50, canvas.height + 10);
-    ctx.fillStyle = waveColor;
-    ctx.fill();
-
-    // Update the time variable for animation
-    time += waveSpeed;
-
-    // Request the next frame of animation
-    requestAnimationFrame(drawWave);
+    return Object.values(topmostCircles);
 }
 
-// Start the animation loop
-drawWave();
+// Function to render lines based on the topmost circles
+function renderLiquidLines(topmostCircles, fillColor) {
+    ctx.beginPath();
+    ctx.strokeStyle = "#0E141B"; // Blue color for lines (adjust as needed)
+    ctx.fillStyle = fillColor || "#0E141B"; // Fill color (default to blue)
+    ctx.lineWidth = 2; // Line width (adjust as needed)
+    ctx.lineCap = "round"
+
+    ctx.moveTo(-10, canvas.height);
+    ctx.lineTo(0, canvas.height);
+    for (let i = 0; i < topmostCircles.length - 1; i++) {
+        ctx.lineTo(topmostCircles[i + 1].x, topmostCircles[i + 1].y);
+    }
+    ctx.lineTo(canvas.width, canvas.height);
+
+    ctx.closePath();
+    ctx.stroke(); // Draw the path
+    ctx.fill();  // Fill the area inside the path
+}
+
+// Function to update ball velocities based on accelerometer data
+function updateBallVelocities(accelerationX, accelerationY) {
+    // You may need to adjust these scaling factors to match the range of your accelerometer data
+    const accelerationScaleX = 0.1; // Adjust as needed
+    const accelerationScaleY = 0.1; // Adjust as needed
+
+    for (const circle of circles) {
+        // Update the ball's velocity based on accelerometer data
+        circle.velocityX += accelerationX * accelerationScaleX;
+        circle.velocityY += accelerationY * accelerationScaleY;
+    }
+}
+
+window.addEventListener('devicemotion', handleAccelerometerData);
+
+// Call this function when you have new accelerometer data
+function handleAccelerometerData(event) {
+    const accelerationX = event.accelerationIncludingGravity.x;
+    const accelerationY = event.accelerationIncludingGravity.y;
+
+    updateBallVelocities(accelerationX, accelerationY);
+}
+
+// Main animation loop
+function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    solveCollisions(circles)
+    for (const circle of circles) {
+        // circle.draw();
+        circle.update();
+    }
+
+    const topmostCircles = getTopmostCircles(circles);
+    renderLiquidLines(topmostCircles);
+
+    console.log(circles[0])
+
+
+    applyGravity();
+    requestAnimationFrame(animate);
+}
+
+// Create initial circles and start the animation
+createRandomCircles(40);
+animate();
