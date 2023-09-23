@@ -174,7 +174,7 @@ function animate() {
 
     solveCollisions(circles)
     for (const circle of circles) {
-        // circle.draw();
+        circle.draw();
         circle.update();
     }
 
