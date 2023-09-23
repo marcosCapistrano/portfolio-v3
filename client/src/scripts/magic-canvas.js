@@ -179,7 +179,7 @@ function animate() {
     }
 
     const topmostCircles = getTopmostCircles(circles);
-    renderLiquidLines(topmostCircles);
+    // renderLiquidLines(topmostCircles);
 
     console.log(circles[0])
 
