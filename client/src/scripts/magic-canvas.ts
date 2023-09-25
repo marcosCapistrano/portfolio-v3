@@ -12,56 +12,72 @@ if (canvasContainer) {
     canvasContainer.appendChild(app.view);
 
     const background = new PIXI.Graphics();
-    const liquidGraphics = new PIXI.Graphics();
-    const moverGraphics = new PIXI.Graphics();
+    const gridGraphics = new PIXI.Graphics();
+    const lineGraphics = new PIXI.Graphics();
     app.stage.addChild(background);
-    app.stage.addChild(liquidGraphics);
-    app.stage.addChild(moverGraphics);
+    app.stage.addChild(gridGraphics);
+    app.stage.addChild(lineGraphics);
 
-    // Rectangle
-    let movers: Array<Mover> = [];
-    let liquid: Liquid;
 
+    let gridSize = 5;
     function setup() {
-        liquid = new Liquid(0, HEIGHT/3, WIDTH, HEIGHT, 1)
-        for (let i = 1; i < WIDTH; i += WIDTH / 100) {
-            movers.push(new Mover(i, 5, 5 + Math.random() * 30));
-        }
 
         background.beginFill(0x0E141B);
         background.drawRect(0, 0, WIDTH, HEIGHT);
         background.endFill();
 
-        liquid.display(liquidGraphics);
-    }
 
-    function draw() {
-        moverGraphics.clear();
-        for (let i = 0; i < movers.length; i++) {
-            // Is the Mover in the liquid?
-            if (liquid.contains(movers[i])) {
-                // Calculate drag force
-                let dragForce = liquid.calculateDrag(movers[i]);
-                // Apply drag force to Mover
-                movers[i].applyForce(dragForce);
+        for (let x = gridSize; x <= WIDTH - gridSize; x += gridSize) {
+            for (let y = gridSize; y <= HEIGHT - gridSize; y += gridSize) {
+                lineGraphics.lineStyle(1, 0x1a2128).moveTo(x, y).lineTo(WIDTH / 2, HEIGHT / 2);
             }
-
-            // Gravity is scaled by mass here!
-            let gravity = new PIXI.Point(0, 0.05 * movers[i].mass);
-            // Apply gravity
-            movers[i].applyForce(gravity);
-
-            // Update and display
-            movers[i].update();
-            movers[i].display(moverGraphics);
-            movers[i].checkEdges(HEIGHT);
         }
 
+        for (let x = gridSize; x <= WIDTH - gridSize; x += gridSize) {
+            for (let y = gridSize; y <= HEIGHT - gridSize; y += gridSize) {
+                gridGraphics.beginFill(0x5e6a77);
+                gridGraphics.drawRect(x - 2, y - 2, 5, 5);
+                gridGraphics.endFill();
+            }
+        }
+
+        gridSize++;
+
+
     }
-
-    setup();
-    app.ticker.add((delta) => {
-        draw();
-    });
-
+setup()
 }
+
+
+//     let counter = 0;
+//     app.ticker.add((delta) => {
+
+//         counter += delta
+//         if (counter > 50) {
+//             lineGraphics.clear();
+//             gridGraphics.clear();
+//             background.beginFill(0x0E141B);
+//             background.drawRect(0, 0, WIDTH, HEIGHT);
+//             background.endFill();
+
+//             for (let x = gridSize; x <= WIDTH - gridSize; x += gridSize) {
+//                 for (let y = gridSize; y <= HEIGHT - gridSize; y += gridSize) {
+//                     lineGraphics.lineStyle(1, 0x1a2128).moveTo(x, y).lineTo(WIDTH / 2, HEIGHT / 2);
+//                 }
+//             }
+
+//             for (let x = gridSize; x <= WIDTH - gridSize; x += gridSize) {
+//                 for (let y = gridSize; y <= HEIGHT - gridSize; y += gridSize) {
+//                     gridGraphics.beginFill(0x5e6a77);
+//                     gridGraphics.drawRect(x - 2, y - 2, 5, 5);
+//                     gridGraphics.endFill();
+
+//                 }
+//             }
+
+//             gridSize++;
+//             counter = 0;
+//             console.log(gridSize)
+//         }
+//     });
+// }

@@ -1,12 +1,19 @@
 ---
 import BaseLayout from "./BaseLayout.astro";
+import '../styles/post.scss'
 const { frontmatter } = Astro.props;
 ---
 
 <BaseLayout title={frontmatter.title}>
     <article class="wrapper">
         <h1>{frontmatter.title}</h1>
-        <p>Written by {frontmatter.author}</p>
+        <p style="margin-bottom: 3rem">Written by {frontmatter.author}</p>
         <slot />
     </article>
 </BaseLayout>
+
+<style lang="scss">
+    article {
+        margin-top: 8rem;
+    }
+</style>

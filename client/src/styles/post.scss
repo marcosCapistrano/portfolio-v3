@@ -1,0 +1,22 @@
+    article {
+        *+* {
+            margin-bottom: 1em;
+        }
+
+        p {
+            max-width: 75ch;
+            line-height: 1.35;
+        }
+
+        h1, h2, h3, h4 {
+            margin-top: 2em;
+        }
+
+        ul {
+            list-style-position: inside;
+            li + li {
+                margin-top: .5em;
+                margin-bottom: 0;
+            }
+        }
+    }

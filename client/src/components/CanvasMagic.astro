@@ -5,7 +5,10 @@
 <div id="pixi-container"></div>
 
 <script>
-    import "../scripts/magic-canvas.js";
+    if(Math.random() > .5)
+    import("../scripts/magic-canvas");
+    else
+    import("../scripts/magic-canvas2")
 </script>
 
 <style lang="scss">

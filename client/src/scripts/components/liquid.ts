@@ -40,7 +40,7 @@ class Liquid {
     }
 
     display(graphics: PIXI.Graphics) {
-        graphics.beginFill(0xDE3249);
+        graphics.beginFill(0x5e6a77);
         graphics.drawRect(this.position.x, this.position.y, this.width, this.height);
         graphics.endFill();
     }
