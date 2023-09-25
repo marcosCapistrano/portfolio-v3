@@ -3,6 +3,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 // import fetchApi from "../lib/strapi";
 // import type Article from "../interfaces/article";
 import CanvasMagic from "../components/CanvasMagic.astro";
+const allPosts = await Astro.glob("./blog/*.md");
 
 // const articles = await fetchApi<Article[]>({
 // 	endpoint: "articles",
@@ -13,34 +14,37 @@ import CanvasMagic from "../components/CanvasMagic.astro";
 ---
 
 <BaseLayout>
-	<CanvasMagic />
-	<main class="homepage wrapper">
-		<section class="recent-posts">
-			<h1>Publicações Recentes</h1>
-			<!-- <ul>
-				{
-					articles.map((article) => (
-						<a href={`/blog/${article.attributes.slug}/`}>
-							{article.attributes.title}
+	<section class="recent-posts">
+		<h1>Publicações Recentes</h1>
+		<ul>
+			{
+				allPosts.map((article) => (
+					<li>
+						<a href={`/blog/${article.frontmatter.slug}/`}>
+							{article.frontmatter.title}
 						</a>
-					))
-				}
-			</ul> -->
-		</section>
-	</main>
+					</li>
+				))
+			}
+		</ul>
+	</section>
 </BaseLayout>
 
 <style lang="scss">
-	.homepage {
-		margin-top: 2rem;
-		section {
-			h1 {
-				font-family: var(--ff-barlow-semi);
-				font-size: var(--fs-300);
-				font-weight: 500;
-				letter-spacing: 2.5px;
-				color: var(--font-color-light-accent);
-				margin-bottom: 1.5rem;
+	section {
+		h1 {
+			font-family: var(--ff-barlow-semi);
+			font-size: var(--fs-300);
+			font-weight: 500;
+			letter-spacing: 2.5px;
+			color: var(--font-color-light-accent);
+			margin-bottom: 1.5rem;
+		}
+
+		ul {
+			list-style: none;
+			li {
+				margin-bottom: .5em;
 			}
 		}
 	}
