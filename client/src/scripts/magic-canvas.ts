@@ -23,7 +23,7 @@ if (canvasContainer) {
     let liquid: Liquid;
 
     function setup() {
-        liquid = new Liquid(0, HEIGHT / 2, WIDTH, HEIGHT / 2, 1)
+        liquid = new Liquid(0, HEIGHT/3, WIDTH, HEIGHT, 1)
         for (let i = 1; i < WIDTH; i += WIDTH / 100) {
             movers.push(new Mover(i, 5, 5 + Math.random() * 30));
         }
