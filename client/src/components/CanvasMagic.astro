@@ -2,22 +2,22 @@
 
 ---
 
-<div class="magic">
-    <canvas id="magic-canvas" width="800" height="600"> </canvas>
+<div id="pixi-container"></div>
 
-    <script>
-        import "../scripts/magic-canvas.js";
-    </script>
-</div>
+<script>
+    import "../scripts/magic-canvas.js";
+</script>
 
 <style lang="scss">
-    .magic {
-        background: linear-gradient(180deg, rgba(14, 20, 27, 0.00) 41.15%, rgba(217, 217, 217, 0.20) 100%);
+    #pixi-container {
         canvas {
-            width: 100%;
-            height: 40dvh;
-            padding: -10px;
-            margin-bottom: -5px;
+            background: linear-gradient(
+                180deg,
+                rgba(14, 20, 27, 0) 41.15%,
+                rgba(217, 217, 217, 0.2) 100%
+            );
         }
+
+        height: 40dvh;
     }
 </style>
