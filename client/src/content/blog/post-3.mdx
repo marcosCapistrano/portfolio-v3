@@ -1,0 +1,17 @@
+---
+layout: ../../layouts/PostLayout.astro
+title: 'Callbacks & Events'
+pubDate: 2022-07-01
+description: 'Nesse artigo aprenderemos sobre as Callbacks, o mecanismo fundamental para o surgimento das promises e até async/await.'
+author: 'marcos'
+slug: 'callbacks'
+image:
+    url: 'https://docs.astro.build/assets/full-logo-light.png'
+    alt: 'The full Astro logo.'
+tags: ["astro", "blogging", "learning in public"]
+---
+
+Quando invocamos uma operação assíncrona, as instruções que a seguem são executadas imediatamente, mesmo se a operação assíncrona não tenha terminado. Neste cenário, precisamos de alguma forma de sermos notificados quando uma operação assíncrona se completou. O mecanismo mais básico para ser notificado sobre o término de uma operação assíncrona em Node.js é a callback, que nada mais é que uma função invocada pela runtime com o resultado de uma operação assíncrona.
+
+A callback é o ponto de partida para todos os outros mecanismos assíncronos. De fato, sem callbacks, não teriamos promises, e nem async/await; também não teríamos streams ou events.
+
