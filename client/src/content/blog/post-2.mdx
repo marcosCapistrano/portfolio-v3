@@ -1,0 +1,54 @@
+---
+layout: ../../layouts/PostLayout.astro
+title: 'Como Node.js Funciona'
+pubDate: 2022-07-01
+description: 'Nesse artigo ganharemos um entendimento sobre como Node.js funciona internamente e uma introdução ao padrão Reactor, que está no coração da natureza assíncrona de Node.js'
+author: 'marcos'
+slug: 'como-nodejs-funciona'
+image:
+    url: 'https://docs.astro.build/assets/full-logo-light.png'
+    alt: 'The full Astro logo.'
+tags: ["astro", "blogging", "learning in public"]
+---
+import BlockingIO from '../../components/misc/BlockingIO/BlockingIO.tsx';
+
+Toda aplicação Node.js precisa de alguma forma lidar com dados, seja fazer uma leitura de um banco de dados, acessar a RAM, ou ainda esperar o clique de um usuário.
+
+I/O geralmente não é algo custoso em termos de CPU, mas isso adiciona um delay entre o momento que a requisição foi enviada até o momento que a operação se completa.
+
+### Blocking I/O
+Tradicionalmente, uma requisição I/O irá bloquear a execução da thread até que a operação retorne seu resultado. Isto pode variar de millisegundos até minutos.
+O seguinte pseudocódigo demonstra uma situação destas:
+
+```
+data = socket.read()
+print(data)
+```
+
+Esta forma de programação é direta e pode facilmente ser entendida, primeiro requisitamos os dados da socket, e então printamos o resultado, uma instrução após a outra. 
+
+Mas isto gera uma pergunta, o que acontece se no caso este fosse um código rodando em um servidor que precisa lidar com várias conexões ao mesmo tempo?
+
+<BlockingIO client:visible/>
+
+A resposta é que ele não será capaz de lidar com multiplas conexões na mesma thread. Isto é pois cada operação I/O irá bloquear o processamento de quaisquer outras conexões; A abordagem tradicional para resolver isto é usar uma thread separada (ou processo) para lidar com cada conexão concorrente. 
+
+### Non-blocking I/O
+Em adição à I/O blocante, a maioria dos sistemas operacionais modernos suportam outro tipo de mecanismo, chamado non-blocking I/O. Neste modo, o sistema sempre retorna imediatamente sem esperar que os dados sejam escritos ou lidos.
+
+O padrão mais básico para se lidar com este tipo de I/O é perguntar infinitamente se algum dado está disponível em loop até que esteja. Isto é chamado **busy-waiting**.
+Desta forma, é possível gerenciar vários recursos na mesma thread, mas de forma ineficiente, já que estaremos na maioria das vezes consumindo CPU perguntando sobre dados que não chegaram ainda. 
+
+### Event demultiplexing
+Felizmente, existe outro mecanismo para lidar com recursos de forma concorrente non-blocking. Este mecanismo se chama **synchronous event demultiplexer**, também conhecido como **event notification interface**.
+
+Se você não é familiar com o termo, em telecomunicações, **multiplexing** se refere ao método pelo qual multiplos sinais são combinados em um só para serem facilmente transmitidos por um meio. Já **demultiplexing** seria a operação inversa, onde o sinal é novamente dividido em seus componentes originais.
+
+O demultiplexer que estamos falando aqui observa multiplos recursos e retornar um novo evento (ou conjunto de eventos) quando uma operação de leitura ou escrita executada sob um destes recursos se completa. A vantagem aqui é que o *synchronous event demultiplexer*, é, claro, síncrono! Portanto, ele bloqueia até que exista novos eventos à serem processados.
+
+## O Padrão Reactor
+Podemos agora então introduzir o padrão reactor. A idéia principal por trás deste padrão é possuir um handler associado com cada operação I/O. Um handler em Node.js é representado por uma função **callback**.
+
+O handler será invocado assim que um evento for produzido e processado pelo event loop.
+
+## TODO: explicar o event loop e os carai

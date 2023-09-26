@@ -1,0 +1,26 @@
+.container {
+    display: flex;
+    width: 100%;
+    justify-content: space-around;
+    gap: 1rem;
+}
+
+.entity {
+    flex: 1;
+    border: 1px solid grey;
+    text-align: center;
+    padding: 1em;
+}
+
+.title {
+    font-weight: bold;
+}
+
+.active {
+    background-color: rgb(109, 109, 2);
+}
+
+.flex {
+    display: flex;
+    flex-direction: column;
+}

@@ -11,11 +11,11 @@ image:
 tags: ["astro", "blogging", "learning in public"]
 ---
 
-Toda plataforma de programação possui sua filosofia, um conjunto de príncipios que guiam a forma como a plataforma é usada e isto influencia ambos o design e o desenvolvimento das aplicações que as usam.
+Toda plataforma de programação possui sua filosofia, um conjunto de príncipios que influencia ambos a evolução da plataforma e o design e desenvolvimento das aplicações que as usam.
 
 Em Node.js, alguns desses príncipios vem de seu criador - Ryan Dahl - enquanto que outros veem das pessoas que contribuem para o core, e finalmente, alguns são herdados do movimento JavaScript em geral.
 
-Estes príncipios são:
+Nenhum destes são regras, e devem sempre ser aplicados com bom senso, porém, são tremendamente úteis quando procuramos por uma fonte de inspiração quando projetamos nosso software.
 
 ## 1. Núcleo Pequeno
 Um dos príncipios na criação de Node.js e seus módulos built-in é possuir o menor conjunto de funcionalidades possível, enquanto que o resto deve ser responsabilidade do usuário, ou seja os módulos que vivem fora do *core*.
@@ -36,8 +36,8 @@ Módulos pequenos são:
 
 
 ## 3. Pequena área de contato
-Aleḿ de pequenos em tamanho e escopo, outra característica desejável de módulos é a de se expor um conjunto de funcionalidades mínimo.
+Além de pequenos em tamanho e escopo, outra característica desejável de módulos é a de se expor um conjunto de funcionalidades mínimo.
 
 Por exemplo, um padrão comum de definição de módulos é o de se expor apenas uma funcionalidade, tal qual uma função ou uma classe, pelo simples fato de isto fornecer um ponto de entrada único, sem chance de confusão.
 
-Diminuir a exposição tem o efeito de produzir uma API mais fácil de ser utilizada, mantida, e menos suscetível a erros. De fato, a maioria dos usuários de um componente estarão interessados em apenas um pequeno conjunto de features, sem a necessidade de extender ou usar aspectos mais avançados.
+Diminuir a exposição tem o efeito de produzir uma API mais fácil de ser utilizada, mantida, e menos suscetível a erros. De fato, a maioria dos usuários de um componente estarão interessados em apenas um pequeno conjunto de features, sem a necessidade de estender ou usar aspectos mais avançados.

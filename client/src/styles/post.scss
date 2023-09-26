@@ -1,10 +1,14 @@
     article {
+        .no-space {
+            margin-bottom: 0;
+        }
+        
         *+* {
             margin-bottom: 1em;
         }
 
         p {
-            max-width: 75ch;
+            // max-width: 75ch;
             line-height: 1.35;
         }
 

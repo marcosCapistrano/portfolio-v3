@@ -1,18 +1,65 @@
 ---
+import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-const allPosts = await Astro.glob("../blog/*.md");
-const pageTitle = "My Astro Learning Blog";
+const recentPosts = await getCollection("blog");
+const pageTitle = "Posts Recentes";
 ---
 
 <BaseLayout pageTitle={pageTitle}>
-    <p>This is where I will post about my journey learning Astro.</p>
-    <ul>
-        {
-            allPosts.map((post) => (
-                <li>
-                    <a href={post.url}>{post.frontmatter.title}</a>
-                </li>
-            ))
-        }
-    </ul>
+    <section class="recent-posts">
+        <h1>Publicações Recentes</h1>
+        <ul>
+            {
+                recentPosts.map((article) => (
+                    <li class="post">
+                        <h2>{article.data.title}</h2>
+                        <p>{article.data.description}</p>
+                        <a href={`/blog/${article.slug}/`}>Leia Mais</a>
+                    </li>
+                ))
+            }
+        </ul>
+    </section>
 </BaseLayout>
+
+<style lang="scss">
+    section {
+		h1 {
+			font-family: var(--ff-barlow-semi);
+			font-size: var(--fs-300);
+			font-weight: 500;
+			letter-spacing: 2.5px;
+			color: var(--font-color-light-accent);
+			margin-bottom: 1.5rem;
+		}
+
+		ul {
+			display: flex;
+			flex-direction: column;
+			gap: 2rem;
+			list-style: none;
+			li {
+				display: flex;
+				flex-direction: column;
+				gap: 0.75em;
+
+				h2 {
+					font-family: var(--ff-barlow);
+					font-weight: 600;
+				}
+
+				p {
+					// font-family: var(--ff-main);
+					color: #8497ad;
+					line-height: 1.5;
+					letter-spacing: 1.5%;
+				}
+
+				a {
+					font-family: var(--ff-barlow);
+					font-weight: 700;
+				}
+			}
+		}
+	}
+</style>
