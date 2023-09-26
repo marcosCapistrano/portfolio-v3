@@ -1,9 +1,9 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-// import fetchApi from "../lib/strapi";
-// import type Article from "../interfaces/article";
-import CanvasMagic from "../components/CanvasMagic.astro";
-const allPosts = await Astro.glob("./blog/*.md");
+import { getCollection, getEntry } from "astro:content";
+
+const recentPosts = await getCollection("blog");
+const journeys = await getCollection("journeys");
 
 // const articles = await fetchApi<Article[]>({
 // 	endpoint: "articles",
@@ -18,6 +18,38 @@ const allPosts = await Astro.glob("./blog/*.md");
 		<h1>Publicações Recentes</h1>
 		<ul>
 			{
+				recentPosts.map((article) => (
+					<li class="post">
+						<h2>{article.data.title}</h2>
+						<p>{article.data.description}</p>
+						<a href={`/blog/${article.slug}/`}>Leia Mais</a>
+					</li>
+				))
+			}
+		</ul>
+	</section>
+
+	<!-- <section class="journeys">
+		<h1>Jornadas</h1>
+		<ul>
+			{
+				journeys.map((article) => (
+					<li class="post">
+						<h2>{article.data.title}</h2>
+						<p>{article.data.description}</p>
+						<a href={`/blog/${article.data.slug}/`}>
+							Leia Mais
+						</a>
+					</li>
+				))
+			}
+		</ul>
+	</section> -->
+
+	<!-- <section class="categories">
+		<h1>Categorias</h1>
+		<ul>
+			{
 				allPosts.map((article) => (
 					<li>
 						<a href={`/blog/${article.frontmatter.slug}/`}>
@@ -27,7 +59,7 @@ const allPosts = await Astro.glob("./blog/*.md");
 				))
 			}
 		</ul>
-	</section>
+	</section> -->
 </BaseLayout>
 
 <style lang="scss">
@@ -42,9 +74,31 @@ const allPosts = await Astro.glob("./blog/*.md");
 		}
 
 		ul {
+			display: flex;
+			flex-direction: column;
+			gap: 2rem;
 			list-style: none;
 			li {
-				margin-bottom: .5em;
+				display: flex;
+				flex-direction: column;
+				gap: 0.75em;
+
+				h2 {
+					font-family: var(--ff-barlow);
+					font-weight: 600;
+				}
+
+				p {
+					// font-family: var(--ff-main);
+					color: #8497ad;
+					line-height: 1.5;
+					letter-spacing: 1.5%;
+				}
+
+				a {
+					font-family: var(--ff-barlow);
+					font-weight: 700;
+				}
 			}
 		}
 	}

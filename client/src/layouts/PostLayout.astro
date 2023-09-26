@@ -1,13 +1,18 @@
 ---
 import BaseLayout from "./BaseLayout.astro";
-import '../styles/post.scss'
+import "../styles/post.scss";
 const { frontmatter } = Astro.props;
 ---
 
 <BaseLayout title={frontmatter.title}>
     <article class="wrapper">
-        <h1>{frontmatter.title}</h1>
-        <p style="margin-bottom: 3rem">Written by {frontmatter.author}</p>
+        <h1 style="margin-bottom: 3rem">{frontmatter.title}</h1>
         <slot />
     </article>
 </BaseLayout>
+
+<style>
+    h1 {
+        font-size: var(--fs-700);
+    }
+</style>

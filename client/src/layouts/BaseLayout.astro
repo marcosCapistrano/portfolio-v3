@@ -5,6 +5,8 @@ import "@fontsource/barlow-semi-condensed";
 import "@fontsource/roboto";
 import Header from "../components/Header.astro";
 import CanvasMagic from "../components/CanvasMagic.astro";
+import Footer from "../components/Footer.astro";
+import { ViewTransitions } from "astro:transitions";
 
 const { title } = Astro.props;
 ---
@@ -14,6 +16,7 @@ const { title } = Astro.props;
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>{title}</title>
+        <!-- <ViewTransitions /> -->
     </head>
     <body>
         <Header />
@@ -21,11 +24,16 @@ const { title } = Astro.props;
         <main class="wrapper">
             <slot />
         </main>
+        <Footer/>
     </body>
 </html>
 
-<style>
+<style lang="scss">
     main {
-        margin-top: 5rem;
+        height: 100%;
+        margin-top: 2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
     }
 </style>

@@ -25,7 +25,7 @@ html {
 body {
     margin: 0;
     padding: 0;
-
+    min-height: 100dvh;
     background-color: var(--main-bg-color-dark);
     font-family: var(--ff-main);
     color: var(--font-color-light-primary);
@@ -55,6 +55,14 @@ a {
 }
 
 /* ------------- */
+
+.fs-300 {
+    font-size: var(--fs-300);
+}
+
+.ff-semi {
+    font-family: var(--ff-barlow-semi);
+}
 
 .wrapper {
     max-width: 1100px;

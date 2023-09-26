@@ -1,10 +1,10 @@
 ---
 layout: ../../layouts/PostLayout.astro
-title: 'A BCDE'
+title: 'A Filosofia Node.js'
 pubDate: 2022-07-01
-description: 'This is the first post of my new Astro blog.'
-author: 'Marcos Capistrano'
-slug: 'post-2'
+description: 'Toda plataforma de programação possui sua filosofia, um conjunto de príncipios que guiam a forma como a plataforma é usada e isto influencia ambos o design e o desenvolvimento das aplicações que as usam.'
+author: 'marcos'
+slug: 'post-1'
 image:
     url: 'https://docs.astro.build/assets/full-logo-light.png'
     alt: 'The full Astro logo.'
