@@ -2,16 +2,249 @@
 layout: ../../layouts/PostLayout.astro
 title: 'Callbacks & Events'
 pubDate: 2022-07-01
-description: 'Nesse artigo aprenderemos sobre as Callbacks, o mecanismo fundamental para o surgimento das promises e até async/await.'
+description: 'A callback é o mecanismo básico no qual todos outros mecanismos assincronos são baseados. Sem as callbacks, não teriamos Promises, e portanto nem async/await.'
 author: 'marcos'
-slug: 'callbacks'
+slug: 'callbacks-e-events'
 image:
     url: 'https://docs.astro.build/assets/full-logo-light.png'
     alt: 'The full Astro logo.'
 tags: ["astro", "blogging", "learning in public"]
 ---
 
-Quando invocamos uma operação assíncrona, as instruções que a seguem são executadas imediatamente, mesmo se a operação assíncrona não tenha terminado. Neste cenário, precisamos de alguma forma de sermos notificados quando uma operação assíncrona se completou. O mecanismo mais básico para ser notificado sobre o término de uma operação assíncrona em Node.js é a callback, que nada mais é que uma função invocada pela runtime com o resultado de uma operação assíncrona.
+## O padrão Callback
+Callbacks são funções que são invocadas para propagar o resultado de uma operação. No mundo assincrono, elas substituem o uso da instrução `return`, que por sua vez, sempre executam de forma síncrona.
+JavaScript é a linguagem ideal para callbacks pois funções são objetos first-class e podem facilmente serem atribuidas à variáveis, passadas como argumentos, etc. Além de também possuir **closures**, que é uma construção ideal para implementar callbacks. Com closures, podemos referenciar o ambiente no qual uma função foi criada, desta forma, podemos sempre manter o contexto no qual a operação assincrona foi requisitada, não importa aonde ou quando a callback for invocada.
 
-A callback é o ponto de partida para todos os outros mecanismos assíncronos. De fato, sem callbacks, não teriamos promises, e nem async/await; também não teríamos streams ou events.
+### O estilo continuation-passing
+Em JavaScript, uma callback é uma função passada como argumento para outra função, a mesma será invocada com o resultado da operação quando ela se completar.
+Em programação funcional, esta forma de propagar o resultado é chamada de **continuation-passing style (CPS)**.
 
+Este estilo é um conceito geral, e não está sempre associado com operações assincronas. Na verdade, ela simplesmente indica que o resultado é propagado passando-o para outra função (no caso a callback), ao invés de diretamente retornar ao caller.
+
+### CPS Síncrono
+Para clarificar o conceito, vamos mostrar uma função síncrona utilizando estilo direto, e depois a com CPS.
+
+```js
+function add(a, b) {
+    return a + b
+}
+```
+
+O equivalente CPS da função seria:
+
+```js
+function addCps(a, b, callback) {
+    callback(a + b)
+}
+```
+
+A função `addCps` é uma função CPS síncrona. Síncrona pois irá completar sua execução somente quando a callback completar sua execução também.
+
+### CPS Assíncrono
+Vamos considerar o caso onde a função `addCps()` é assíncrona.
+
+```js
+function addAsync(a, b, callback) {
+    setTimeout(() => callback(a + b), 100)
+}
+```
+
+`setTimeout()` adiciona uma task à event queue que será executada após um dado número de millisegundos. Isto é claramente uma operação assíncrona:
+
+```js
+console.log('before')
+additionAsync(1, 2, result => console.log(`Result: ${result}`))
+console.log('after')
+```
+
+Output:
+```bash
+before
+after
+Result: 3
+```
+
+Como `setTimeout` engatilha uma operação assíncrona, ela não espera pela callback ser executada. Na verdade ela retorna imediatamente, dando controle de volta à `addAsync()`, e então novamente ao seu caller. Esta propriedade em Node.js é crucical, já que ela devolve o controle ao event loop assim que uma requisição assíncrona é enviada, portanto permitindo que novos eventos na queue sejam processados.
+
+Quando a operação assíncrona finalmente se completar, a execução é então resumida, começando apartir da callback fornecida à função assíncrona que causou sua invocação.
+
+
+## Síncrono ou Assíncrono?
+A ordem de execução das instruções muda radicalmente dependendo da natureza de uma função - síncrona ou assíncrona. Isto tem fortes repercusões no fluxo de toda a aplicação, ambos em termos de exatidão e eficiência.
+
+Vamos analisar estes dois paradigmas e suas desvantagens.
+Em geral, o que deve ser evitado é criar inconsistência e confusão entre a natureza de uma API.
+
+### Uma função imprevisível
+Uma das situações mais perigosas é possuir uma API que se comporta de forma síncrona sobre certas condições e assíncrona em outras:
+
+```js
+import {readFile} from 'fs'
+
+const cache = new Map()
+
+function inconsistentRead(filename, cb) {
+    if(cache.has(filename)) {
+        cb(cache.get(filename)) // CPS Síncrono
+    } else {
+        readFile(filename, 'utf-8', (err, data) => {
+            cache.set(filename, data)
+            cb(data)
+        })
+    }
+}
+```
+
+A função anterior é perigosa pois se comporta de forma assíncrona até que o arquivo seja lido pela primeira vez e o cache set setado, mas síncrona para todas as requisições subsequentes quando o conteúdo do arquivo já estiver em cache.
+
+
+### Libertando Zalgo
+Considere o seguinte código:
+
+```js
+function createFileReader (filename) {
+  const listeners = []
+  inconsistentRead(filename, value => {
+    listeners.forEach(listener => listener(value))
+  })
+  return {
+    onDataReady: listener => listeners.push(listener)
+  }
+}
+```
+
+Quando a função anterior é invocada, ela cria um novo objeto que age como um notificador, nos permitindo setar multiplos listeners para um operação de leitura de arquivo. Todos os listeneres serão invocados de uma vez quando a operação de leitura terminar e os dados estiverem disponíveis:
+
+```js
+const reader1 = createFileReader('data.txt')
+reader1.onDataReady(data => {
+  console.log(`First call data: ${data}`)
+  // ...sometime later we try to read again from
+  // the same file
+  const reader2 = createFileReader('data.txt')
+  reader2.onDataReady(data => {
+    console.log(`Second call data: ${data}`)
+  })
+})
+```
+
+Output:
+```bash
+First call data: some data
+```
+
+Como podemos ver, a callback do segundo reader nunca é invocada. Porque:
+
+- Durante a criação de `reader1`, nossa função `inconsistentRead()` se comporta de forma assíncrona pois não existe resultados cached disponíveis. isto significa que qualquer listener `onDataReady` será invocado depois em outro ciclo do event loop, portanto temos todo o tempo que precisamos para registrar nosso listener.
+- Depois, `reader2` é criado no ciclo do event loop em que o cache para o arquivo requisitado já existe. Neste caso, a chamada interior para `inconsistentRead()` será síncrona. Portanto sua callback será invocada imediatamente, o que significa que todos os listeners de `reader2` serão invocadas síncronamente também. Porém, estamos registrando o listener após a criação de `reader2`, portanto nunca serão invocados.
+
+O comportamento da função `inconsistentRead()` é muito imprevisível, e o bug que acabamos de ver pode ser extremamente complicado de identificar e reproduzit em uma aplicação real.
+
+### Usando APIs síncronas
+A lição aqui é que é imperativo para uma API claramente definir sua natureza.
+
+Uma possível solução para nossa função `inconsistenRead()` é fazê-la completamente síncrona:
+
+```js
+import { readFileSync } from 'fs'
+const cache = new Map()
+function consistentReadSync (filename) {
+  if (cache.has(filename)) {
+    return cache.get(filename)
+  } else {
+    const data = readFileSync(filename, 'utf8')
+    cache.set(filename, data)
+    return data
+  }
+}
+```
+
+Note como ela também foi convertida para o estilo direto. è sempre uma boa prática implementar uma API síncrona utilizando o estilo direto. Isto irá eliminar qualquer confusão sobre sua natureza e também será mais eficiente de uma perspectiva de performance.
+
+Além de ter de mudar nossa interface na API do `createFileReader()`, existem outras armadilhas em se usar uma API síncrona:
+
+- Uma API síncrona para uma funcionalidade específica pode não ser disponível.
+- Uma API síncrone irá bloquear o event loop e colocar quaisquer outras requisições concorrentes em espera. Isto quebra o modelo de concorrência de Node.js, desacelerando toda a aplicação.
+
+Usar um I/O síncrono em Node.js é desencourajado em muitas circunstâncias, mas em algumas, pode ser a mais fácil e mais eficiente solução. Sempre avalie seu caso específico e escolha a alternativa correta. Como exemplo, faria total sentido usar uma API síncrona blocante para carregar um arquivo de configuração em startup time.
+
+### Garantindo assíncronicidade com execução deferida
+Outra alternativa para consertar nossa função é fazê-la puramente assíncrona. O truque aqui é agendar à invocação da callback síncrona para o "futuro" ao invés de rodá-la imediatamente no mesmo ciclo do event loop. Em Node.js, isto é possível com `process.nextTick()`, que defere a execução de uma função após a operação atual terminar:
+
+```js
+import { readFile } from 'fs'
+const cache = new Map()
+function consistentReadAsync (filename, callback) {
+  if (cache.has(filename)) {
+    // deferred callback invocation
+    process.nextTick(() => callback(cache.get(filename)))
+  } else {
+    // asynchronous function
+    readFile(filename, 'utf8', (err, data) => {
+      cache.set(filename, data)
+      callback(data)
+    })
+  }
+}
+```
+
+Agora, graças ao `process.nextTick()`, nossa função é garantida de invocar sua callback de forma assíncrona, sob quaisquer circunstâncias. 
+
+
+## Convenções de Callback em Node.js
+Em Node.js, APIs CPS e callbacks seguem um conjunto de convenções específicas.
+
+### A callback vem por último
+Em todas funções core Node.js, a convenção é que quando uma função aceita uma callback, ela tem de ser passada como o último argumento.
+
+```js
+readFile(filename, [options], callback)
+```
+
+### Qualquer erro sempre vem primeiro
+Em CPS, erros produzidos por uma função CPS são sempre passados como o primeiro argumento da callback, e qualquer resultado real é passado começando do segundo argumento. Se a operação se completa sem erros, o primeiro argumento será `null` ou `undefined`. 
+
+```js
+readFile('foo.txt', 'utf8', (err, data) => {
+  if(err) {
+    handleError(err)
+  } else {
+    processData(data)
+  }
+})
+```
+
+É boa prática sempre checar a presença de um erro, já que não fazer isto torna mais díficil encontrar possíveis pontos de falha. Outra convenção importante é que o erro deve sempre ser do tipo `Error`.
+
+### Propagando erros
+Propagar erros em funções síncronas diretas é feito com a statement `throw`, que causa o erro pular acima na call stack até que ele seja pego.
+
+Em CPS assíncrono, porém, propagação de erro correta é feita simplesmente passando o erro à proxima callback na corrente. O padrão típico é:
+
+```js
+import { readFile } from 'fs'
+
+function readJSON (filename, callback) {
+  readFile(filename, 'utf8', (err, data) => {
+    let parsed
+    if (err) {
+      // propagate the error and exit the current function
+      return callback(err)
+    }
+    try {
+      // parse the file contents
+      parsed = JSON.parse(data)
+    } catch (err) {
+      // catch parsing errors
+      return callback(err)
+    }
+    // no errors, propagate just the data
+    callback(null, parsed)
+  })
+}
+```
+
+Note como não usamos `throw` nem `return`. Note também como usamos a statement `try...catch` para pegar quaisquer erros vindos de `JSON.parse()`, que é uma função síncrona e portanto usa a tradicional instrução `throw` para propagar erros ao caller.
+Finalmente, se tudo deu certo, `callback` é invocada com `null` no primeiro argumento indicando que não houveram erros.
+
+## O Padrão Observer

@@ -13,10 +13,11 @@ html {
 
     --ff-main: "Roboto";
     --ff-barlow: "Barlow";
-    --ff-barlow-semi: "Barlow Semi Condensed"
+    --ff-barlow-semi: "Barlow Semi Condensed";
+    --ff-mono: "Courier New";
 
     --fs-300: .75rem;
-    --fs-400: 1rem;
+    --fs-400: 1.15rem;
     --fs-500: 1.25rem;
     --fs-600: 1.5rem;
     --fs-700: 2.5rem;
@@ -27,7 +28,7 @@ body {
     padding: 0;
     min-height: 100dvh;
     background-color: var(--main-bg-color-dark);
-    font-family: var(--ff-main);
+    font-family: var(--ff-main), ;
     color: var(--font-color-light-primary);
     font-size: var(--fs-400);
 }

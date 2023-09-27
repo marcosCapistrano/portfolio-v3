@@ -2,25 +2,43 @@
         .no-space {
             margin-bottom: 0;
         }
-        
+
         *+* {
             margin-bottom: 1em;
         }
 
         p {
             // max-width: 75ch;
-            line-height: 1.35;
+            line-height: 1.5;
         }
 
-        h1, h2, h3, h4 {
+        h1,
+        h2,
+        h3,
+        h4 {
             margin-top: 2em;
         }
 
         ul {
             list-style-position: inside;
-            li + li {
+
+            li+li {
                 margin-top: .5em;
                 margin-bottom: 0;
             }
+        }
+
+        pre {
+            padding: 1em;
+            border-radius: 5px;
+        }
+
+        code {
+            display: inline-block;
+            background-color: #24292e;
+            padding: .15em .25em;
+            margin: .2em;
+            border-radius: 5px;
+            font-family: var(--ff-mono), monospace;
         }
     }

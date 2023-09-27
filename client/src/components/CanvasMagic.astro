@@ -5,12 +5,14 @@
 <div id="pixi-container" transition:persist></div>
 
 <script>
-    if(Math.random() < .3)
+    let rnd = Math.random();
+
+    if(rnd < .5)
     import("../scripts/magic-canvas");
-    else if(Math.random() < .6)
+    else if(rnd < 1)
     import("../scripts/magic-canvas2")
-    else
-    import("../scripts/magic-canvas3")
+    // else
+    // import("../scripts/magic-canvas3")
 </script>
 
 <style lang="scss">
