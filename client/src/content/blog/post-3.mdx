@@ -248,3 +248,155 @@ Note como não usamos `throw` nem `return`. Note também como usamos a statement
 Finalmente, se tudo deu certo, `callback` é invocada com `null` no primeiro argumento indicando que não houveram erros.
 
 ## O Padrão Observer
+Em conjunto com o padrão Reactor e callbacks, o padrão Observer é um requisito absoluto para masterizar Node.js.
+
+O padrão Observer é a solução ideal para modelar a natureza reativa de Node.js e é um complemento para callbacks.
+
+> O padrão Observer define um objeto (chamado sujeito) que pode notificar um conjunto de observadores (ou listeners) quando uma mudança em seu estado ocorre.
+
+A diferença principal do padrão Callback é que o sujeito pode notificar multiplos observadores, enquanto que callbacks geralmente propagam seu resultado para apenas um listener, a callback.
+
+
+### O EventEmitter
+Em Node.js, o padrão Observer é facilmente utilizado pois ele está construido na core e disponível através da classe `EventEmitter`. A classe `EventEmitter` nos permite registrar uma ou mais funções como listeners, que serão invocados quando um tipo de evento em particular for atirado.
+
+```js
+import { EventEmitter } from 'events'
+const emitter = new EventEmitter()
+```
+
+Os métodos essencias de `EventEmitter` são:
+
+- `on(event, listener)`: registra um novo listener (uma função) para o tipo de evento dado (string).
+- `once(event, listener)`: registra um novo listener, que é então removido após o evento ser emitido pela primeira vez.
+- `emit(event, [arg1], [...])`: produz um novo evento e fornece argumentos adicionais que serão passados aos listeners.
+- `removeListener(event, listener)`: remove um listener do tipo de evento especificado.
+
+A função `listener` possui a assinatura `function([arg1], [...])`, portanto ela simplesmente aceita os argumentos fornecidos pelo emissor do evento.
+
+### Criando e usando o EventEmitter
+
+#### Usando uma instância
+```js
+import { EventEmitter } from 'events'
+import { readFile } from 'fs'
+function findRegex (files, regex) {
+  const emitter = new EventEmitter()
+  for (const file of files) {
+    readFile(file, 'utf8', (err, content) => {
+      if (err) {
+        return emitter.emit('error', err)
+      }
+      emitter.emit('fileread', file)
+      const match = content.match(regex)
+      if (match) {
+        match.forEach(elem => emitter.emit('found', file, elem))
+      }
+    })
+  }
+  return emitter
+}
+```
+
+A função que definimos acima retorna uma instância de um EventEmitter que irá produzir três tipos de eventos:
+
+- `fileread`, quando um arquivo estiver sendo lido.
+- `found`, quando um match for encontrado.
+- `error`, quando um erro ocorrer durante a leitura do arquivo.
+
+A função pode ser usada desta forma:
+
+```js
+findRegex(
+  ['fileA.txt', 'fileB.json'],
+  /hello \w+/g
+)
+  .on('fileread', file => console.log(`${file} was read`))
+  .on('found', (file, match) => console.log(`Matched "${match}" in ${file}`))
+  .on('error', err => console.error(`Error emitted ${err.message}`))
+```
+
+#### Usando uma classe
+O EventEmitter é raramente usado por si só, como no exemplo anterior. Na verdade, é mais comum ve-lo extendido por outras classes. Na prática, isto permite qualquer classe herdar as capacidades do EventEmitter, portanto se tornando um objeto observável.
+
+```js
+import { EventEmitter } from 'events'
+import { readFile } from 'fs'
+class FindRegex extends EventEmitter {
+  constructor (regex) {
+    super()
+    this.regex = regex
+    this.files = []
+  }
+  addFile (file) {
+    this.files.push(file)
+    return this
+  }
+  find () {
+    for (const file of this.files) {
+      readFile(file, 'utf8', (err, content) => {
+        if (err) {
+          return this.emit('error', err)
+        }
+        this.emit('fileread', file)
+        const match = content.match(this.regex)
+        if (match) {
+          match.forEach(elem => this.emit('found', file, elem))
+        }
+      })
+    }
+    return this
+  }
+}
+```
+
+E usamos desta forma:
+
+```js
+const findRegexInstance = new FindRegex(/hello \w+/)
+findRegexInstance
+  .addFile('fileA.txt')
+  .addFile('fileB.json')
+  .find()
+  .on('found', (file, match) => console.log(`Matched "${match}" in file ${file}`))
+  .on('error', err => console.error(`Error emitted ${err.message}`))
+```
+
+### Propagando erros
+Assim como com callbacks, o EventEmitter não pode apenas `throw` uma exceção quando um erro ocorre. Ao invés disto, a convenção é emitir um evento especial, chamado `error`, e passar um objeto `Error` como argumento.
+
+> O `EventEmitter` trata o evento `error` de forma especial. Ele irá automaticamente `throw` uma exceção e sair da aplicação se nenhum listener associado for achado. Por esta razão, é recomendado sempre registrar um listener para o evento `error`.
+
+{/* ### Eventos Síncronos e Assíncronos
+Assim como com callbacks, eventos podem ser emitidos de forma síncrona ou assíncrona. É crucial que nunca misturemos as duas abordagens no mesmo `EventEmitter`, mas ainda mais importante, devemos nunca emitir o mesmo tipo de evento usando um mix de código síncrono e assíncrono. A diferença principal entre emitir eventos síncronos e assíncronos encontra-se na forma como os listeners são registrados. */}
+
+## EventEmitter vs Callbacks
+Um dilema comum quando definimos uma API assíncrona é decidindo se usamos um `EventEmitter` ou se simplesmente aceitaremos uma callback.
+A regra geral é semântica:
+- Callbacks para quando o resultado deve ser retornado de forma assíncrona
+- Eventos quando temos uma necessidade de comunicar que algo aconteceu.
+
+Mas além deste príncipio simples, aqui vão outras dicas para ajudar na seleção do método:
+
+- Usamos `events` quando precisamos suportar diferentes tipos de eventos, com callbacks fariamos aceitando diversas callbacks diferentes para serem chamadas, porém isto não é muito elegante.
+- `EventEmitter` deve ser usado quando o mesmo evento pode ocorrer multiplas vezes, ou pode não ocorrer nunca. Uma callback espera ser invocada exatamente uma vez.
+- Uma API que usa callbacks pode notificar apenas uma callback em particular, `EventEmitter` permite registrar múltiplos listeners para o mesmo evento.
+
+### Combinando callbacks e events
+Existem algumas circunstâncias onde o `EventEmitter` pode ser usado em conjunto com uma callback. Este padrão é extremamente poderoso já que nos permite passar um resultado de forma assíncrona usando uma callback tradicional, e ao mesmo tempo retornar um `EventEmitter`, que pode ser usado para fornecer maiores detalhes sobre o status de um processo assíncrono.
+Um exemplo deste padrão é oferecido pelo pacote `glob`, uma bibloteca que performa buscas glob-style em arquivos:
+
+```js
+import glob from 'glob'
+glob('data/*.txt',
+  (err, files) => {
+    if (err) {
+      return console.error(err)
+    }
+    console.log(`All files found: ${JSON.stringify(files)}`)
+  })
+  .on('match', match => console.log(`Match found: ${match}`))
+```
+
+Combinar um `EventEmitter` com callbacks tradicionais é uma forma elegante de se oferecer duas abordagens diferentes na mesma API. Uma abordagem é geralmente para um uso mais simples e imediato, enquanto a outra é para aqueles cenários mais avançados/detalhados.
+
