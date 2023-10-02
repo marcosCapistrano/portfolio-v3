@@ -1,6 +1,6 @@
 ---
 layout: ../../layouts/PostLayout.astro
-title: 'Promises'
+title: 'Padrões de Fluxo de Controle usando Callbacks'
 pubDate: 2022-07-01
 description: 'Nesse artigo aprenderemos sobre as Callbacks, o mecanismo fundamental para o surgimento das promises e até async/await.'
 author: 'marcos'

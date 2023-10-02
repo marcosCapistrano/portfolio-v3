@@ -322,3 +322,95 @@ O padrão apresentado é muito poderoso e pode ser extendido ou adaptado para en
 - Podemos até iterar sobre um número infinito de elementos.
 
 ### Execução Paralela
+Existem situações onde a ordem a execução de um conjunto de tarefas assíncronas não é importartante, e tudo o que queremos é sermos notificados quando todas essas tarefas se completem.
+
+Este padrão pode ser generalizado da forma:
+
+```js
+const tasks = [ /* ... */ ]
+
+let completed = 0
+tasks.forEach(task => {
+  task(() => {
+    if (++completed === tasks.length) {
+      finish()
+    }
+  })
+})
+
+function finish () {
+  // all the tasks completed
+}
+```
+
+#### Race Conditions em Tarefas Concorrentes
+Rodar um conjunto de tarefas em paralelo pode causar problemas quando possuimos multiplas threads. Porém, em Node.js a história é diferente. Não precisamos de construções como locks, muteces, semáforos ou monitores. Porém, isto não significa que não podemos ter race conditions; pelo contrário, eles podem ser bem comuns. A raiz do problema é o delay entre a invocação de uma operação assíncrono e a notificação de seu resultado.
+
+
+#### Execução paralela limitada
+Spawnar tarefas paralelas sem controle pode levar à uma carga excessiva. Imagine possuir milhares de arquivos para leitura, URLs para se acessar, ou queries em bancos para rodar em paralelo. Um problema comum em tais situações é acabar ficando sem recursos. 
+Limitar o número de tarefas é, em geral, uma boa prática que ajuda a construir aplicações resilientes. 
+
+#### Limitando Concorrência
+```js
+const tasks = [
+  // ...
+]
+
+const concurrency = 2
+let running = 0
+let completed = 0
+let index = 0
+
+function next () {                                          
+  while (running < concurrency && index < tasks.length) {
+    const task = tasks[index++]
+    task(() => {                                            
+      if (++completed === tasks.length) {
+        return finish()
+      }
+      running--
+      next()
+    })
+    running++
+  }
+}
+
+next()
+
+function finish() {
+  // all tasks finished
+}
+```
+
+Este algoritmo pode ser considerado uma mistura de execução sequencial e paralela. De fato, conseguimos notar algumas similaridades em ambos os padrões:
+
+1. Possuimos uma função iterator, que chamamos de `next()`, e então um loop interno que spawna quantas tarefas forem possíveis em paralelo enquanto se mantém dentro do limite de concorrência.
+2. A próxima parte importante é a callback que passamos para cada tarefa, que checa se já completamos todas as tarefas da lista. Se ainda existir tarefas para rodar, ela invoca `next()` para spawnar outro conjunto de tarefas.
+
+#### Limitando Concorrência Globalmente
+```js
+export class TaskQueue {
+  constructor (concurrency) {
+    this.concurrency = concurrency
+    this.running = 0
+    this.queue = []
+  }
+  pushTask (task) {
+    this.queue.push(task)
+    process.nextTick(this.next.bind(this))
+    return this
+  }
+  next () {
+    while (this.running < this.concurrency && this.queue.length) {
+      const task = this.queue.shift()
+      task(() => {
+        this.running--
+        process.nextTick(this.next.bind(this))
+      })
+      this.running++
+    }
+  }
+}
+```
+
